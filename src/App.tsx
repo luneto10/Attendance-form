@@ -2,7 +2,7 @@ import Form from "./components/Form";
 
 
 function App() {
-    const studentsData: { name: string; course: string; labTime: string }[] = [];
+    const studentsData: { nuid: string; name: string; course: string; labTime: string }[] = [];
 
     return (
         <div className="App">
