@@ -1,12 +1,25 @@
-import Form from "./components/Form";
-
+import Form from "./pages/Form";
+import "./App.css";
+import { Route, Routes } from "react-router-dom";
+import Admin from "./pages/Admin";
 
 function App() {
-    const studentsData: { nuid: string; name: string; course: string; labTime: string }[] = [];
+    const studentsData: {
+        nuid: string;
+        name: string;
+        course: string;
+        labTime: string;
+    }[] = [];
 
     return (
         <div className="App">
-            <Form studentsData={studentsData}/>
+            <Routes>
+                <Route
+                    path="/"
+                    element={<Form studentsData={studentsData} />}
+                />
+                <Route path="/admin" element={<Admin />} />
+            </Routes>
         </div>
     );
 }
