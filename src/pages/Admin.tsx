@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Pagination from "../components/Pagination";
 import StudentRow from "../components/StudentRow";
 import StudentCard from "../components/StudentCard";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import { DateTime } from "luxon";
+import { convertToCST, sortByDateAndName } from "../utils/dateUtils";
+import {
+    getStudents,
+    deleteStudentById,
+    deleteAllStudents,
+} from "../utils/apiUtils";
 
 function Admin() {
     const [students, setStudents] = useState<Student[]>([]);
@@ -15,31 +19,41 @@ function Admin() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [rowsPerPage] = useState<number>(10);
 
+    // Retrieve `selectedDay` from Local Storage or use today's date as default
+    const [selectedDay, setSelectedDay] = useState<string>(() => {
+        const storedDate = localStorage.getItem("selectedDay");
+        const storedTimestamp = localStorage.getItem("selectedDayTimestamp");
+
+        if (storedDate && storedTimestamp) {
+            const now = new Date().getTime();
+            const storedTime = parseInt(storedTimestamp, 10);
+
+            if (now - storedTime < 60 * 60 * 1000) {
+                return storedDate;
+            } else {
+                localStorage.removeItem("selectedDay");
+                localStorage.removeItem("selectedDayTimestamp");
+            }
+        }
+
+        const today = new Date();
+        return convertToCST(today.toISOString());
+    });
+
     const [selectedCourse, setSelectedCourse] = useState<string>("All");
     const [selectedLabTime, setSelectedLabTime] = useState<string>("All");
-    const [selectedDay, setSelectedDay] = useState<string>("");
     const [searchNuid, setSearchNuid] = useState<string>("");
 
-    // Fetch students from API
     const fetchStudents = async () => {
-        setLoading(true); // Show loading spinner during fetch
+        setLoading(true);
         try {
-            const response = await axios.get(
-                "http://localhost:3000/api/students"
-            );
-            const studentsData = response.data;
-            const convertedStudents = studentsData.map((student: Student) => {
-                const utcDate = DateTime.fromISO(student.createdAt, { zone: "utc" });
-                const cstDate = utcDate.setZone("America/Chicago");
-                return {
-                    ...student,
-                    createdAt: cstDate.toISO(),
-                };
-            });
-    
+            const studentsData = await getStudents();
+            const convertedStudents = studentsData.map((student) => ({
+                ...student,
+                createdAt: convertToCST(student.createdAt),
+            }));
             setStudents(convertedStudents);
-            // setFilteredStudents(convertedStudents);
-
+            setFilteredStudents(convertedStudents);
         } catch (err) {
             setError("Failed to fetch students. Please try again.");
         } finally {
@@ -52,27 +66,42 @@ function Admin() {
     }, []);
 
     const handleRefresh = () => {
-        window.location.reload();
+        fetchStudents();
+    };
+
+    const handleDeleteAll = async () => {
+        if (window.confirm("Are you sure you want to delete all students?")) {
+            try {
+                await deleteAllStudents();
+                setStudents([]);
+                setFilteredStudents([]);
+                alert("All students have been deleted successfully!");
+            } catch (err) {
+                alert("Failed to delete all students. Please try again.");
+            }
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteStudentById(id);
+            setStudents((prev) => prev.filter((student) => student._id !== id));
+        } catch (err) {
+            setError("Failed to delete student. Please try again.");
+        }
     };
 
     const handleEdit = (student: Student) => {
         console.log("Edit student:", student);
     };
 
-    const handleDeleteAll = async () => {
-        if (!window.confirm("Are you sure you want to delete all students?")) {
-            return;
-        }
-
-        try {
-            await axios.delete("http://localhost:3000/api/students");
-            setStudents([]);
-            setFilteredStudents([]);
-            alert("All students have been deleted successfully!");
-        } catch (err) {
-            console.error("Error deleting all students:", err);
-            alert("Failed to delete all students. Please try again.");
-        }
+    const handleDateChange = (newDate: string) => {
+        setSelectedDay(newDate);
+        localStorage.setItem("selectedDay", newDate);
+        localStorage.setItem(
+            "selectedDayTimestamp",
+            new Date().getTime().toString()
+        );
     };
 
     useEffect(() => {
@@ -91,10 +120,9 @@ function Admin() {
         }
 
         if (selectedDay) {
-            filtered = filtered.filter((student) => {
-                const studentDate = student.createdAt.slice(0, 10);
-                return studentDate === selectedDay;
-            });
+            filtered = filtered.filter(
+                (student) => student.createdAt === selectedDay
+            );
         }
 
         if (searchNuid) {
@@ -103,34 +131,22 @@ function Admin() {
             );
         }
 
-        filtered.sort((a, b) => {
-            const dateA = new Date(a.createdAt).toISOString().slice(0, 10); 
-            const dateB = new Date(b.createdAt).toISOString().slice(0, 10);
-
-            console.log(dateA, dateB);
-            if (dateA !== dateB) {
-                return dateB.localeCompare(dateA);
-            }
-
-            return a.name.localeCompare(b.name);
-        });
+        filtered.sort(sortByDateAndName);
 
         setFilteredStudents(filtered);
+
         if (filtered.length === 0 && currentPage > 1) {
             setCurrentPage(currentPage - 1);
         }
-    }, [selectedCourse, selectedLabTime, selectedDay, searchNuid, students]);
+    }, [
+        selectedCourse,
+        selectedLabTime,
+        selectedDay,
+        searchNuid,
+        students,
+        currentPage,
+    ]);
 
-    const handleDelete = async (id: string) => {
-        try {
-            await axios.delete(`http://localhost:3000/api/students/${id}`);
-            setStudents((prev) => prev.filter((student) => student._id !== id));
-        } catch (err) {
-            setError("Failed to delete student. Please try again.");
-        }
-    };
-
-    // Pagination logic
     const totalPages = Math.ceil(filteredStudents.length / rowsPerPage);
     const displayedStudents = filteredStudents.slice(
         (currentPage - 1) * rowsPerPage,
@@ -163,10 +179,8 @@ function Admin() {
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="mb-4">
                 <div className="row">
-                    {/* Filter by Course */}
                     <div className="col-md-3">
                         <label htmlFor="course" className="form-label">
                             Filter by Course:
@@ -182,8 +196,6 @@ function Admin() {
                             <option value="CSCE 156H">CSCE 156H</option>
                         </select>
                     </div>
-
-                    {/* Filter by Lab Time */}
                     <div className="col-md-3">
                         <label htmlFor="labTime" className="form-label">
                             Filter by Lab Time:
@@ -212,8 +224,6 @@ function Admin() {
                             </option>
                         </select>
                     </div>
-
-                    {/* Filter by Day */}
                     <div className="col-md-3">
                         <label htmlFor="day" className="form-label">
                             Filter by Day:
@@ -223,11 +233,9 @@ function Admin() {
                             id="day"
                             className="form-control"
                             value={selectedDay}
-                            onChange={(e) => setSelectedDay(e.target.value)}
+                            onChange={(e) => handleDateChange(e.target.value)}
                         />
                     </div>
-
-                    {/* Search by NUID */}
                     <div className="col-md-3">
                         <label htmlFor="searchNuid" className="form-label">
                             Search by NUID:
@@ -244,17 +252,16 @@ function Admin() {
                 </div>
             </div>
 
-            {/* Students Table for Desktop */}
-            {filteredStudents && <div className="d-none d-md-block">
+            <div className="d-none d-md-block">
                 <table className="table table-striped table-bordered">
-                    <thead className="thead-dark">
-                        <tr className="text-center">
-                            <th scope="col">Name</th>
-                            <th scope="col">NUID</th>
-                            <th scope="col">Course</th>
-                            <th scope="col">Lab Time</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Actions</th>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>NUID</th>
+                            <th>Course</th>
+                            <th>Lab Time</th>
+                            <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -268,9 +275,8 @@ function Admin() {
                         ))}
                     </tbody>
                 </table>
-            </div>}
+            </div>
 
-            {/* Cards for Smartphones */}
             <div className="d-block d-md-none">
                 {displayedStudents.map((student) => (
                     <StudentCard
@@ -290,14 +296,13 @@ function Admin() {
                 >
                     Delete All
                 </button>
-                {students.length > rowsPerPage &&
-                    filteredStudents.length > 0 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={setCurrentPage}
-                        />
-                    )}
+                {students.length > rowsPerPage && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                )}
             </div>
         </div>
     );

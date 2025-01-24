@@ -33,7 +33,6 @@ function Form({ studentsData }: FormProps) {
         setFormData((prevData) => {
             const updatedData = { ...prevData, [name]: value };
 
-            // Automatically update labTime for "CSCE 156H"
             if (name === "course" && value === "CSCE 156H") {
                 updatedData.labTime = "4:30 PM - 6:20 PM";
             } else if (name === "course" && value !== "CSCE 156H") {
