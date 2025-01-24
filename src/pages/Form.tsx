@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import TextInput from "../components/TextInput";
 import SelectInput from "../components/SelectInput";
 import SuccessMessage from "../components/SuccessMessage";
+import { getDeviceIdentifier, hasSubmittedToday } from "../utils/deviceUtils";
 
 interface FormProps {
     studentsData: {
@@ -10,6 +10,7 @@ interface FormProps {
         name: string;
         course: string;
         labTime: string;
+        deviceId: string;
     }[];
 }
 
@@ -19,11 +20,13 @@ function Form({ studentsData }: FormProps) {
         nuid: "",
         course: "CSCE 156",
         labTime: "8:30 AM - 10:20 AM",
+        deviceId: "",
     });
 
     const [submittedData, setSubmittedData] = useState<typeof formData | null>(
         null
     );
+    const [error, setError] = useState<string | null>(null);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -45,9 +48,13 @@ function Form({ studentsData }: FormProps) {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setError(null);
 
         try {
-            await axios.post("http://localhost:3000/api/students", formData);
+
+            // const response = await axios.post("http://localhost:3000/api/students", formData);
+
+            // console.log("Data sent:", response.data);
 
             setSubmittedData(formData);
             studentsData.push(formData);
@@ -57,10 +64,12 @@ function Form({ studentsData }: FormProps) {
                 nuid: "",
                 course: "CSCE 156",
                 labTime: "8:30 AM - 10:20 AM",
+                deviceId: "",
             });
+
         } catch (error) {
             console.error("Error sending data:", error);
-            alert("Failed to send data. Please try again.");
+            setError("Failed to send data. Please try again.");
         }
     };
 
@@ -68,6 +77,8 @@ function Form({ studentsData }: FormProps) {
         <div className="container d-flex justify-content-center align-items-center py-4 vh-100">
             <div className="card p-4 w-100" style={{ maxWidth: "500px" }}>
                 <h1 className="text-center mb-4">Attendance</h1>
+
+                {error && <p className="text-danger">{error}</p>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="row">

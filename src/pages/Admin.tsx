@@ -255,7 +255,7 @@ function Admin() {
             <div className="d-none d-md-block">
                 <table className="table table-striped table-bordered">
                     <thead>
-                        <tr>
+                        <tr className="text-center">
                             <th>Name</th>
                             <th>NUID</th>
                             <th>Course</th>

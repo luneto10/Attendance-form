@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 function StudentRow({ student, onEdit, onDelete }: any) {
     return (
-        <tr>
+        <tr >
             <td className="text-sm">{student.name}</td>
             <td className="text-sm">{student.nuid}</td>
             <td className="text-sm">{student.course}</td>
@@ -12,7 +12,7 @@ function StudentRow({ student, onEdit, onDelete }: any) {
                     DateTime.DATE_MED
                 )}
             </td>
-            <td className="text-center">
+            <td className="d-flex justify-content-around">
                 <button
                     className="btn btn-sm p-0"
                     onClick={() => onEdit(student)}
