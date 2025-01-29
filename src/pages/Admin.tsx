@@ -9,6 +9,8 @@ import {
     deleteStudentById,
     deleteAllStudents,
 } from "../utils/apiUtils";
+import SelectInput from "../components/SelectInput";
+import TextInput from "../components/TextInput";
 
 function Admin() {
     const [students, setStudents] = useState<Student[]>([]);
@@ -17,9 +19,8 @@ function Admin() {
     const [error, setError] = useState<string | null>(null);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [rowsPerPage] = useState<number>(10);
+    const [rowsPerPage] = useState<number>(5);
 
-    // Retrieve `selectedDay` from Local Storage or use today's date as default
     const [selectedDay, setSelectedDay] = useState<string>(() => {
         const storedDate = localStorage.getItem("selectedDay");
         const storedTimestamp = localStorage.getItem("selectedDayTimestamp");
@@ -47,11 +48,69 @@ function Admin() {
     const fetchStudents = async () => {
         setLoading(true);
         try {
-            const studentsData = await getStudents();
-            const convertedStudents = studentsData.map((student) => ({
-                ...student,
-                createdAt: convertToCST(student.createdAt),
-            }));
+            const convertedStudents = [
+                {
+                    _id: "1",
+                    nuid: "12345",
+                    name: "John Doe",
+                    course: "Computer Science",
+                    labTime: "Lab 1",
+                    createdAt: "2023-01-01T00:00:00.000Z",
+                },
+                {
+                    _id: "2",
+                    nuid: "67890",
+                    name: "Jane Smith",
+                    course: "Mathematics",
+                    labTime: "Lab 2",
+                    createdAt: "2023-01-02T00:00:00.000Z",
+                },
+                {
+                    _id: "3",
+                    nuid: "54321",
+                    name: "Bob Johnson",
+                    course: "Physics",
+                    labTime: "Lab 3",
+                    createdAt: "2023-01-03T00:00:00.000Z",
+                },
+                {
+                    _id: "4",
+                    nuid: "98765",
+                    name: "Alice Williams",
+                    course: "Chemistry",
+                    labTime: "Lab 4",
+                    createdAt: "2023-01-04T00:00:00.000Z",
+                },
+                {
+                    _id: "5",
+                    nuid: "24680",
+                    name: "Charlie Brown",
+                    course: "Biology",
+                    labTime: "Lab 5",
+                    createdAt: "2023-01-05T00:00:00.000Z",
+                },
+                {
+                    _id: "6",
+                    nuid: "13579",
+                    name: "Eve Green",
+                    course: "Computer Science",
+                    labTime: "Lab 6",
+                    createdAt: "2023-01-06T00:00:00.000Z",
+                },
+                {
+                    _id: "7",
+                    nuid: "86420",
+                    name: "Frank White",
+                    course: "Mathematics",
+                    labTime: "Lab 7",
+                    createdAt: "2023-01-07T00:00:00.000Z",
+                },
+            ];
+            // const studentsData = await getStudents();
+            // const convertedStudents = studentsData.map((student) => ({
+            //     ...student,
+            //     createdAt: convertToCST(student.createdAt!),
+            // }));
             setStudents(convertedStudents);
             setFilteredStudents(convertedStudents);
         } catch (err) {
@@ -84,8 +143,11 @@ function Admin() {
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteStudentById(id);
+            // await deleteStudentById(id);
             setStudents((prev) => prev.filter((student) => student._id !== id));
+            if (students.length - 1 <= (currentPage - 1) * rowsPerPage) {
+                setCurrentPage((prev) => prev - 1);
+            }
         } catch (err) {
             setError("Failed to delete student. Please try again.");
         }
@@ -137,6 +199,7 @@ function Admin() {
 
         if (filtered.length === 0 && currentPage > 1) {
             setCurrentPage(currentPage - 1);
+            window.location.reload();
         }
     }, [
         selectedCourse,
@@ -182,47 +245,52 @@ function Admin() {
             <div className="mb-4">
                 <div className="row">
                     <div className="col-md-3">
-                        <label htmlFor="course" className="form-label">
-                            Filter by Course:
-                        </label>
-                        <select
+                        <SelectInput
                             id="course"
-                            className="form-select"
+                            label="Filter by Course"
+                            name="course"
                             value={selectedCourse}
                             onChange={(e) => setSelectedCourse(e.target.value)}
-                        >
-                            <option value="All">All</option>
-                            <option value="CSCE 156">CSCE 156</option>
-                            <option value="CSCE 156H">CSCE 156H</option>
-                        </select>
+                            options={[
+                                { value: "All", label: "All" },
+                                { value: "CSCE 156", label: "CSCE 156" },
+                                { value: "CSCE 156H", label: "CSCE 156H" },
+                            ]}
+                            required
+                        />
                     </div>
                     <div className="col-md-3">
-                        <label htmlFor="labTime" className="form-label">
-                            Filter by Lab Time:
-                        </label>
-                        <select
+                        <SelectInput
                             id="labTime"
-                            className="form-select"
+                            label="Filter by Lab Time"
+                            name="labTime"
                             value={selectedLabTime}
                             onChange={(e) => setSelectedLabTime(e.target.value)}
-                        >
-                            <option value="All">All</option>
-                            <option value="8:30 AM - 10:20 AM">
-                                8:30 AM - 10:20 AM
-                            </option>
-                            <option value="11:30 AM - 1:20 PM">
-                                11:30 AM - 1:20 PM
-                            </option>
-                            <option value="2:30 PM - 3:20 PM">
-                                2:30 PM - 3:20 PM
-                            </option>
-                            <option value="4:30 PM - 6:20 PM">
-                                4:30 PM - 6:20 PM
-                            </option>
-                            <option value="6:30 PM - 8:20 PM">
-                                6:30 PM - 8:20 PM
-                            </option>
-                        </select>
+                            options={[
+                                { value: "All", label: "All" },
+                                {
+                                    value: "8:30 AM - 10:20 AM",
+                                    label: "8:30 AM - 10:20 AM",
+                                },
+                                {
+                                    value: "11:30 AM - 1:20 PM",
+                                    label: "11:30 AM - 1:20 PM",
+                                },
+                                {
+                                    value: "2:30 PM - 3:20 PM",
+                                    label: "2:30 PM - 3:20 PM",
+                                },
+                                {
+                                    value: "4:30 PM - 6:20 PM",
+                                    label: "4:30 PM - 6:20 PM",
+                                },
+                                {
+                                    value: "6:30 PM - 8:20 PM",
+                                    label: "6:30 PM - 8:20 PM",
+                                },
+                            ]}
+                            required
+                        />
                     </div>
                     <div className="col-md-3">
                         <label htmlFor="day" className="form-label">
@@ -237,13 +305,10 @@ function Admin() {
                         />
                     </div>
                     <div className="col-md-3">
-                        <label htmlFor="searchNuid" className="form-label">
-                            Search by NUID:
-                        </label>
-                        <input
-                            type="text"
+                        <TextInput
                             id="searchNuid"
-                            className="form-control"
+                            name="searchNuid"
+                            label="Search by NUID"
                             value={searchNuid}
                             onChange={(e) => setSearchNuid(e.target.value)}
                             placeholder="Enter NUID"
@@ -296,7 +361,7 @@ function Admin() {
                 >
                     Delete All
                 </button>
-                {students.length > rowsPerPage && (
+                {filteredStudents.length > 0 && filteredStudents.length > rowsPerPage && (
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}

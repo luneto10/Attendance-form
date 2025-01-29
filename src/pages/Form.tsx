@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import TextInput from "../components/TextInput";
 import SelectInput from "../components/SelectInput";
 import SuccessMessage from "../components/SuccessMessage";
-// import { getDeviceIdentifier, hasSubmittedToday } from "../utils/deviceUtils";
-import axios from "axios";
+import { createStudent } from "../utils/apiUtils";
 interface FormProps {
     studentsData: {
         nuid: string;
@@ -49,13 +48,8 @@ function Form({ studentsData }: FormProps) {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(null);
-
         try {
-
-            const response = await axios.post("http://localhost:3000/api/students", formData);
-
-            // console.log("Data sent:", response.data);
-
+            createStudent(formData);
             setSubmittedData(formData);
             studentsData.push(formData);
 
@@ -66,7 +60,6 @@ function Form({ studentsData }: FormProps) {
                 labTime: "8:30 AM - 10:20 AM",
                 deviceId: "",
             });
-
         } catch (error) {
             console.error("Error sending data:", error);
             setError("Failed to send data. Please try again.");

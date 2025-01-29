@@ -19,8 +19,8 @@ export const convertToCST = (isoDate: string): string => {
  * @returns A number indicating the order (positive, negative, or zero).
  */
 export const sortByDateAndName = (a: Student, b: Student): number => {
-    const dateA = DateTime.fromISO(a.createdAt).toISODate() || "";
-    const dateB = DateTime.fromISO(b.createdAt).toISODate() || "";
+    const dateA = DateTime.fromISO(a.createdAt!).toISODate() || "";
+    const dateB = DateTime.fromISO(b.createdAt!).toISODate() || "";
 
     // Sort by date in descending order (newest first)
     if (dateA !== dateB) {
