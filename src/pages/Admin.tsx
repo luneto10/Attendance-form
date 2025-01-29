@@ -169,10 +169,10 @@ function Admin() {
 
     return (
         <div className="container vh-100 text-dark">
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="d-flex justify-content-between align-items-center mb-3 mt-1">
                 <h1 className="mb-0">Students List</h1>
                 <button
-                    className="btn btn-outline-secondary"
+                    className="btn btn-outline-secondary px-2 py-1"
                     onClick={handleRefresh}
                 >
                     <RefreshOutlinedIcon />

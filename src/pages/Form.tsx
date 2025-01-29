@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import TextInput from "../components/TextInput";
 import SelectInput from "../components/SelectInput";
 import SuccessMessage from "../components/SuccessMessage";
-import { getDeviceIdentifier, hasSubmittedToday } from "../utils/deviceUtils";
-
+// import { getDeviceIdentifier, hasSubmittedToday } from "../utils/deviceUtils";
+import axios from "axios";
 interface FormProps {
     studentsData: {
         nuid: string;
@@ -52,7 +52,7 @@ function Form({ studentsData }: FormProps) {
 
         try {
 
-            // const response = await axios.post("http://localhost:3000/api/students", formData);
+            const response = await axios.post("http://localhost:3000/api/students", formData);
 
             // console.log("Data sent:", response.data);
 

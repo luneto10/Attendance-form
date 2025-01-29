@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Busca estudantes da API
 export const getStudents = async (): Promise<Student[]> => {
-    const response = await axios.get("http://localhost:3000/api/students");
+    const response = await axios.get(`http://localhost:3000/api/students`);
     return response.data;
 };
 

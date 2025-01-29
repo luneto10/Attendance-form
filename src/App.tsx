@@ -9,6 +9,7 @@ function App() {
         name: string;
         course: string;
         labTime: string;
+        deviceId: string;
     }[] = [];
 
     return (
