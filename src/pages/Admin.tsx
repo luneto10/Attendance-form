@@ -48,69 +48,69 @@ function Admin() {
     const fetchStudents = async () => {
         setLoading(true);
         try {
-            const convertedStudents = [
-                {
-                    _id: "1",
-                    nuid: "12345",
-                    name: "John Doe",
-                    course: "Computer Science",
-                    labTime: "Lab 1",
-                    createdAt: "2023-01-01T00:00:00.000Z",
-                },
-                {
-                    _id: "2",
-                    nuid: "67890",
-                    name: "Jane Smith",
-                    course: "Mathematics",
-                    labTime: "Lab 2",
-                    createdAt: "2023-01-02T00:00:00.000Z",
-                },
-                {
-                    _id: "3",
-                    nuid: "54321",
-                    name: "Bob Johnson",
-                    course: "Physics",
-                    labTime: "Lab 3",
-                    createdAt: "2023-01-03T00:00:00.000Z",
-                },
-                {
-                    _id: "4",
-                    nuid: "98765",
-                    name: "Alice Williams",
-                    course: "Chemistry",
-                    labTime: "Lab 4",
-                    createdAt: "2023-01-04T00:00:00.000Z",
-                },
-                {
-                    _id: "5",
-                    nuid: "24680",
-                    name: "Charlie Brown",
-                    course: "Biology",
-                    labTime: "Lab 5",
-                    createdAt: "2023-01-05T00:00:00.000Z",
-                },
-                {
-                    _id: "6",
-                    nuid: "13579",
-                    name: "Eve Green",
-                    course: "Computer Science",
-                    labTime: "Lab 6",
-                    createdAt: "2023-01-06T00:00:00.000Z",
-                },
-                {
-                    _id: "7",
-                    nuid: "86420",
-                    name: "Frank White",
-                    course: "Mathematics",
-                    labTime: "Lab 7",
-                    createdAt: "2023-01-07T00:00:00.000Z",
-                },
-            ];
-            // const studentsData = await getStudents();
-            // const convertedStudents = studentsData.map((student) => ({
-            //     ...student,
-            //     createdAt: convertToCST(student.createdAt!),
-            // }));
+            // const convertedStudents = [
+            //     {
+            //         _id: "1",
+            //         nuid: "12345",
+            //         name: "John Doe",
+            //         course: "Computer Science",
+            //         labTime: "Lab 1",
+            //         createdAt: "2023-01-01T00:00:00.000Z",
+            //     },
+            //     {
+            //         _id: "2",
+            //         nuid: "67890",
+            //         name: "Jane Smith",
+            //         course: "Mathematics",
+            //         labTime: "Lab 2",
+            //         createdAt: "2023-01-02T00:00:00.000Z",
+            //     },
+            //     {
+            //         _id: "3",
+            //         nuid: "54321",
+            //         name: "Bob Johnson",
+            //         course: "Physics",
+            //         labTime: "Lab 3",
+            //         createdAt: "2023-01-03T00:00:00.000Z",
+            //     },
+            //     {
+            //         _id: "4",
+            //         nuid: "98765",
+            //         name: "Alice Williams",
+            //         course: "Chemistry",
+            //         labTime: "Lab 4",
+            //         createdAt: "2023-01-04T00:00:00.000Z",
+            //     },
+            //     {
+            //         _id: "5",
+            //         nuid: "24680",
+            //         name: "Charlie Brown",
+            //         course: "Biology",
+            //         labTime: "Lab 5",
+            //         createdAt: "2023-01-05T00:00:00.000Z",
+            //     },
+            //     {
+            //         _id: "6",
+            //         nuid: "13579",
+            //         name: "Eve Green",
+            //         course: "Computer Science",
+            //         labTime: "Lab 6",
+            //         createdAt: "2023-01-06T00:00:00.000Z",
+            //     },
+            //     {
+            //         _id: "7",
+            //         nuid: "86420",
+            //         name: "Frank White",
+            //         course: "Mathematics",
+            //         labTime: "Lab 7",
+            //         createdAt: "2023-01-07T00:00:00.000Z",
+            //     },
+            // ];
+            const studentsData = await getStudents();
+            const convertedStudents = studentsData.map((student) => ({
+                ...student,
+                createdAt: convertToCST(student.createdAt!),
+            }));
             setStudents(convertedStudents);
             setFilteredStudents(convertedStudents);
         } catch (err) {
@@ -143,7 +143,7 @@ function Admin() {
 
     const handleDelete = async (id: string) => {
         try {
-            // await deleteStudentById(id);
+            await deleteStudentById(id);
             setStudents((prev) => prev.filter((student) => student._id !== id));
             if (students.length - 1 <= (currentPage - 1) * rowsPerPage) {
                 setCurrentPage((prev) => prev - 1);

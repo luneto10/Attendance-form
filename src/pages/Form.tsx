@@ -48,11 +48,12 @@ function Form({ studentsData }: FormProps) {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError(null);
+
         try {
-            createStudent(formData);
+            await createStudent(formData);
+
             setSubmittedData(formData);
             studentsData.push(formData);
-
             setFormData({
                 name: "",
                 nuid: "",
@@ -60,9 +61,13 @@ function Form({ studentsData }: FormProps) {
                 labTime: "8:30 AM - 10:20 AM",
                 deviceId: "",
             });
-        } catch (error) {
-            console.error("Error sending data:", error);
-            setError("Failed to send data. Please try again.");
+        } catch (error: any) {
+            if (error.response?.status === 400) {
+                setError("Incompatible device - Please use a mobile device");
+            } else {
+                console.error("Error sending data:", error);
+                setError("Failed to send data. Please try again.");
+            }
         }
     };
 
